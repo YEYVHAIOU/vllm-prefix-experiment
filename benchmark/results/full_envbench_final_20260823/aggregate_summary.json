@@ -1,0 +1,1203 @@
+{
+  "benchmark": {
+    "name": "Full Runtime-Eligible EnvBench",
+    "shards": 9,
+    "cases": [
+      "V",
+      "U",
+      "C",
+      "F"
+    ],
+    "trajectories_per_case": 1274,
+    "tool_events_per_case": 13419,
+    "requests_per_case": 14693,
+    "total_requests_all_cases": 58772,
+    "concurrency": 128,
+    "max_input_tokens": 4000,
+    "max_model_len": 4096,
+    "reset_aware_prefix": true,
+    "aggregation": {
+      "throughput": "sum(successful requests or tokens) / sum(workload elapsed seconds)",
+      "latency": "pooled request-level samples across all 9 shards",
+      "jct": "reconstructed per shard+job_id from request start offset and E2E",
+      "prefix_cache": "sum(hit tokens) / sum(query tokens)",
+      "ttl": "counts summed from summaries; TTL seconds pooled from tool_events.csv",
+      "kv": "pooled periodic kv_cache_samples.csv observations"
+    }
+  },
+  "cases": {
+    "V": {
+      "identity": {
+        "case": "V",
+        "name": "vanilla_vllm",
+        "shards": 9,
+        "trajectories": 1274,
+        "tool_events": 13419,
+        "expected_requests": 14693,
+        "concurrency": 128,
+        "reset_aware_prefix": true
+      },
+      "correctness": {
+        "requests_total": 14693,
+        "success": 14693,
+        "failed": 0,
+        "success_rate": 1.0
+      },
+      "elapsed_seconds": 183.7624684397597,
+      "tokens": {
+        "input": 27211357,
+        "output": 108626,
+        "total": 27319983,
+        "request_throughput_req_per_s": 79.95647927866513,
+        "input_throughput_tok_per_s": 148078.96972128627,
+        "output_throughput_tok_per_s": 591.1217939239283,
+        "total_throughput_tok_per_s": 148670.0915152102
+      },
+      "latency_seconds": {
+        "ttft": {
+          "count": 14693,
+          "mean": 0.8444304492232587,
+          "median": 0.41255955095402896,
+          "p90": 2.0821939471177755,
+          "p95": 2.16188468975015,
+          "p99": 2.265458483919501,
+          "max": 2.3457781160250306
+        },
+        "tpot": {
+          "count": 13419,
+          "mean": 0.020513382059616395,
+          "median": 0.024324374739080667,
+          "p90": 0.0334380771233035,
+          "p95": 0.0382557732818116,
+          "p99": 0.04381595496420881,
+          "max": 0.0503732961535986
+        },
+        "e2e": {
+          "count": 14693,
+          "mean": 0.9755890065330824,
+          "median": 0.6025802360381931,
+          "p90": 2.228678989224136,
+          "p95": 2.327936526667327,
+          "p99": 2.4373703192267566,
+          "max": 2.5266956919804215
+        }
+      },
+      "jct_seconds": {
+        "count": 1274,
+        "mean": 11.467138017128987,
+        "median": 12.657037161989138,
+        "p90": 15.958847085433082,
+        "p95": 18.037672987405674,
+        "p99": 20.26902120616054,
+        "max": 20.97469984018244
+      },
+      "prefix_cache": {
+        "query_tokens": 27211357.0,
+        "hit_tokens": 17733696.0,
+        "miss_tokens": 9477661.0,
+        "token_hit_rate": 0.6517020080990448,
+        "miss_rate": 0.34829799190095523
+      },
+      "preemptions": 0.0,
+      "ttl": {
+        "matched_events": 0,
+        "unmatched_events": 13419,
+        "hit_count": 0,
+        "timeout_count": 0,
+        "hit_rate": null,
+        "timeout_rate": null,
+        "seconds": {
+          "count": 0,
+          "mean": null,
+          "median": null,
+          "p90": null,
+          "p95": null,
+          "p99": null,
+          "max": null
+        },
+        "history_source_counts": {}
+      },
+      "kv_sample_metrics": {
+        "continuum_active_blocks": {
+          "count": 771,
+          "mean": 973.3942931258107,
+          "median": 922.0,
+          "p90": 1824.0,
+          "p95": 2996.5,
+          "p99": 4852.099999999998,
+          "max": 5942.0
+        },
+        "continuum_active_unpinned_blocks": {
+          "count": 771,
+          "mean": 973.3942931258107,
+          "median": 922.0,
+          "p90": 1824.0,
+          "p95": 2996.5,
+          "p99": 4852.099999999998,
+          "max": 5942.0
+        },
+        "continuum_evictable_cached_blocks": {
+          "count": 771,
+          "mean": 7743.343709468223,
+          "median": 8500.0,
+          "p90": 8897.0,
+          "p95": 9001.0,
+          "p99": 9182.6,
+          "max": 9309.0
+        },
+        "continuum_evicted_blocks_total": {
+          "count": 771,
+          "mean": 34260.15823605707,
+          "median": 39661.0,
+          "p90": 57958.0,
+          "p95": 61308.5,
+          "p99": 62456.299999999996,
+          "max": 62588.0
+        },
+        "continuum_free_blocks": {
+          "count": 771,
+          "mean": 8445.360570687419,
+          "median": 8606.0,
+          "p90": 9407.0,
+          "p95": 9530.0,
+          "p99": 9530.0,
+          "max": 9530.0
+        },
+        "continuum_pin_events_total": {
+          "count": 771,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "continuum_pinned_blocks": {
+          "count": 771,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "continuum_pinned_requests": {
+          "count": 771,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "continuum_running_blocks": {
+          "count": 771,
+          "mean": 973.3942931258107,
+          "median": 922.0,
+          "p90": 1824.0,
+          "p95": 2996.5,
+          "p99": 4852.099999999998,
+          "max": 5942.0
+        },
+        "continuum_shared_pinned_running_blocks": {
+          "count": 771,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "continuum_total_blocks": {
+          "count": 771,
+          "mean": 9418.75486381323,
+          "median": 9530.0,
+          "p90": 9530.0,
+          "p95": 9530.0,
+          "p99": 9530.0,
+          "max": 9530.0
+        },
+        "continuum_true_free_blocks": {
+          "count": 771,
+          "mean": 702.0168612191959,
+          "median": 102.0,
+          "p90": 713.0,
+          "p95": 4581.0,
+          "p99": 9126.599999999999,
+          "max": 9485.0
+        },
+        "continuum_unpin_events_total": {
+          "count": 771,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "kv_cache_usage_perc": {
+          "count": 771,
+          "mean": 0.1021400097718584,
+          "median": 0.09674711437565586,
+          "p90": 0.19139559286463803,
+          "p95": 0.31442812172088147,
+          "p99": 0.5091395592864635,
+          "max": 0.623504721930745
+        },
+        "num_requests_running": {
+          "count": 771,
+          "mean": 10.62905317769131,
+          "median": 9.0,
+          "p90": 19.0,
+          "p95": 34.0,
+          "p99": 57.0,
+          "max": 64.0
+        },
+        "num_requests_waiting": {
+          "count": 771,
+          "mean": 59.78339818417639,
+          "median": 83.0,
+          "p90": 113.0,
+          "p95": 114.0,
+          "p99": 116.0,
+          "max": 118.0
+        }
+      },
+      "ucm": {
+        "offload_decisions": 0.0,
+        "what_decisions": 0.0,
+        "tier_create_events": 0.0,
+        "tier_dump_events": 0.0,
+        "tier_load_events": 0.0,
+        "when_select_rate": null,
+        "what_retain_rate": null,
+        "what_prune_rate": null
+      },
+      "ucm_reason_counts": {},
+      "ucm_event_counts": {},
+      "storage": {
+        "ssd_store_gib_per_shard": {
+          "count": 0,
+          "mean": null,
+          "median": null,
+          "p90": null,
+          "p95": null,
+          "p99": null,
+          "max": null
+        },
+        "ssd_store_bytes_per_shard": {
+          "count": 0,
+          "mean": null,
+          "median": null,
+          "p90": null,
+          "p95": null,
+          "p99": null,
+          "max": null
+        },
+        "note": "Per-shard end footprint. Shards ran sequentially and backing stores were cleaned between runs; do not sum as simultaneous disk requirement."
+      }
+    },
+    "U": {
+      "identity": {
+        "case": "U",
+        "name": "vllm_ucm",
+        "shards": 9,
+        "trajectories": 1274,
+        "tool_events": 13419,
+        "expected_requests": 14693,
+        "concurrency": 128,
+        "reset_aware_prefix": true
+      },
+      "correctness": {
+        "requests_total": 14693,
+        "success": 14693,
+        "failed": 0,
+        "success_rate": 1.0
+      },
+      "elapsed_seconds": 568.2837289094459,
+      "tokens": {
+        "input": 27211357,
+        "output": 108626,
+        "total": 27319983,
+        "request_throughput_req_per_s": 25.855042565086848,
+        "input_throughput_tok_per_s": 47883.399815474986,
+        "output_throughput_tok_per_s": 191.1474752382171,
+        "total_throughput_tok_per_s": 48074.547290713206
+      },
+      "latency_seconds": {
+        "ttft": {
+          "count": 14693,
+          "mean": 2.7933129733252464,
+          "median": 0.5098957950249314,
+          "p90": 7.003342464799063,
+          "p95": 8.608634554501622,
+          "p99": 11.203482844680547,
+          "max": 13.900762972189113
+        },
+        "tpot": {
+          "count": 13419,
+          "mean": 0.15872765934246055,
+          "median": 0.1355347271143858,
+          "p90": 0.36352366247613516,
+          "p95": 0.4457523808714799,
+          "p99": 0.5515475780523516,
+          "max": 0.6568952834100595
+        },
+        "e2e": {
+          "count": 14693,
+          "mean": 3.80808129025522,
+          "median": 1.278668844141066,
+          "p90": 9.316724636545406,
+          "p95": 10.48255141521804,
+          "p99": 13.218690741807222,
+          "max": 17.28338017920032
+        }
+      },
+      "jct_seconds": {
+        "count": 1274,
+        "mean": 44.14203381948951,
+        "median": 49.75027334212791,
+        "p90": 56.892105137673205,
+        "p95": 59.663398346852034,
+        "p99": 63.298934174228926,
+        "max": 65.53575762314722
+      },
+      "prefix_cache": {
+        "query_tokens": 27211357.0,
+        "hit_tokens": 18274832.0,
+        "miss_tokens": 8936525.0,
+        "token_hit_rate": 0.6715884106772037,
+        "miss_rate": 0.32841158932279635
+      },
+      "preemptions": 0.0,
+      "ttl": {
+        "matched_events": 0,
+        "unmatched_events": 13419,
+        "hit_count": 0,
+        "timeout_count": 0,
+        "hit_rate": null,
+        "timeout_rate": null,
+        "seconds": {
+          "count": 0,
+          "mean": null,
+          "median": null,
+          "p90": null,
+          "p95": null,
+          "p99": null,
+          "max": null
+        },
+        "history_source_counts": {}
+      },
+      "kv_sample_metrics": {
+        "continuum_active_blocks": {
+          "count": 2443,
+          "mean": 2401.679083094556,
+          "median": 2529.0,
+          "p90": 4479.400000000001,
+          "p95": 5153.400000000003,
+          "p99": 6310.0,
+          "max": 7348.0
+        },
+        "continuum_active_unpinned_blocks": {
+          "count": 2443,
+          "mean": 2401.679083094556,
+          "median": 2529.0,
+          "p90": 4479.400000000001,
+          "p95": 5153.400000000003,
+          "p99": 6310.0,
+          "max": 7348.0
+        },
+        "continuum_evictable_cached_blocks": {
+          "count": 2443,
+          "mean": 5941.85427752763,
+          "median": 6349.0,
+          "p90": 8713.600000000002,
+          "p95": 8923.0,
+          "p99": 9120.0,
+          "max": 9349.0
+        },
+        "continuum_evicted_blocks_total": {
+          "count": 2443,
+          "mean": 24348.74826033565,
+          "median": 22476.0,
+          "p90": 51686.0,
+          "p95": 54102.8,
+          "p99": 55818.22,
+          "max": 56728.0
+        },
+        "continuum_free_blocks": {
+          "count": 2443,
+          "mean": 7054.203029062628,
+          "median": 6963.0,
+          "p90": 9321.8,
+          "p95": 9419.9,
+          "p99": 9530.0,
+          "max": 9530.0
+        },
+        "continuum_pin_events_total": {
+          "count": 2443,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "continuum_pinned_blocks": {
+          "count": 2443,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "continuum_pinned_requests": {
+          "count": 2443,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "continuum_running_blocks": {
+          "count": 2443,
+          "mean": 2401.679083094556,
+          "median": 2529.0,
+          "p90": 4479.400000000001,
+          "p95": 5153.400000000003,
+          "p99": 6310.0,
+          "max": 7348.0
+        },
+        "continuum_shared_pinned_running_blocks": {
+          "count": 2443,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "continuum_total_blocks": {
+          "count": 2443,
+          "mean": 9455.882112157184,
+          "median": 9530.0,
+          "p90": 9530.0,
+          "p95": 9530.0,
+          "p99": 9530.0,
+          "max": 9530.0
+        },
+        "continuum_true_free_blocks": {
+          "count": 2443,
+          "mean": 1112.348751534998,
+          "median": 80.0,
+          "p90": 4900.4000000000015,
+          "p95": 7189.300000000001,
+          "p99": 9071.539999999999,
+          "max": 9490.0
+        },
+        "continuum_unpin_events_total": {
+          "count": 2443,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "kv_cache_usage_perc": {
+          "count": 2443,
+          "mean": 0.2520124956027866,
+          "median": 0.26537250786988453,
+          "p90": 0.47003147953830016,
+          "p95": 0.5407555089192029,
+          "p99": 0.6621196222455403,
+          "max": 0.7710388247639035
+        },
+        "num_requests_running": {
+          "count": 2443,
+          "mean": 26.771182971756037,
+          "median": 27.0,
+          "p90": 51.0,
+          "p95": 58.0,
+          "p99": 66.0,
+          "max": 76.0
+        },
+        "num_requests_waiting": {
+          "count": 2443,
+          "mean": 61.97584936553418,
+          "median": 72.0,
+          "p90": 111.0,
+          "p95": 113.0,
+          "p99": 118.0,
+          "max": 126.0
+        }
+      },
+      "ucm": {
+        "offload_decisions": 15131.0,
+        "when_candidates": 242351.0,
+        "when_effective": 242351.0,
+        "when_selected": 242351.0,
+        "when_skipped": 0.0,
+        "what_decisions": 15589.0,
+        "what_candidates": 242351.0,
+        "what_retained": 242351.0,
+        "what_pruned": 0.0,
+        "tier_create_events": 15127.0,
+        "tier_create_total": 242255.0,
+        "tier_create_dram": 657.0,
+        "tier_create_ssd": 222836.0,
+        "tier_dump_events": 15131.0,
+        "tier_dump_dram_blocks": 657.0,
+        "tier_dump_ssd_blocks": 241694.0,
+        "tier_load_events": 4236.0,
+        "tier_load_dram_blocks": 1707.0,
+        "tier_load_ssd_blocks": 307860.0,
+        "when_select_rate": 1.0,
+        "what_retain_rate": 1.0,
+        "what_prune_rate": 0.0
+      },
+      "ucm_reason_counts": {
+        "UCM_OFFLOAD_DECISION:eager": 15131,
+        "UCM_WHAT_DECISION:full": 15589
+      },
+      "ucm_event_counts": {
+        "UCM_LOAD_DECISION": 4236,
+        "UCM_OFFLOAD_DECISION": 15131,
+        "UCM_TIER_CREATE": 15127,
+        "UCM_TIER_DUMP": 15131,
+        "UCM_TIER_LOAD": 4236,
+        "UCM_TIER_LOOKUP": 4235,
+        "UCM_WHAT_DECISION": 15589
+      },
+      "storage": {
+        "ssd_store_gib_per_shard": {
+          "count": 9,
+          "mean": 38.16942556409372,
+          "median": 38.72545013949275,
+          "p90": 39.26687870696187,
+          "p95": 39.98741523250938,
+          "p99": 40.56384445294738,
+          "max": 40.70795175805688
+        },
+        "ssd_store_bytes_per_shard": {
+          "count": 9,
+          "mean": 40984108626.22222,
+          "median": 41581135468.0,
+          "p90": 42162489965.6,
+          "p95": 42936160168.8,
+          "p99": 43555096331.36,
+          "max": 43709830372.0
+        },
+        "note": "Per-shard end footprint. Shards ran sequentially and backing stores were cleaned between runs; do not sum as simultaneous disk requirement."
+      }
+    },
+    "C": {
+      "identity": {
+        "case": "C",
+        "name": "vllm_continuum",
+        "shards": 9,
+        "trajectories": 1274,
+        "tool_events": 13419,
+        "expected_requests": 14693,
+        "concurrency": 128,
+        "reset_aware_prefix": true
+      },
+      "correctness": {
+        "requests_total": 14693,
+        "success": 14693,
+        "failed": 0,
+        "success_rate": 1.0
+      },
+      "elapsed_seconds": 125.88716317387298,
+      "tokens": {
+        "input": 27211357,
+        "output": 108626,
+        "total": 27319983,
+        "request_throughput_req_per_s": 116.71563350511208,
+        "input_throughput_tok_per_s": 216156.72570535398,
+        "output_throughput_tok_per_s": 862.8838498010144,
+        "total_throughput_tok_per_s": 217019.60955515498
+      },
+      "latency_seconds": {
+        "ttft": {
+          "count": 14693,
+          "mean": 0.30243898233501987,
+          "median": 0.10781446797773242,
+          "p90": 0.26389732174575387,
+          "p95": 1.422671364899722,
+          "p99": 4.990142774311825,
+          "max": 6.22372487001121
+        },
+        "tpot": {
+          "count": 13419,
+          "mean": 0.0293210116687984,
+          "median": 0.03709413214320583,
+          "p90": 0.044340377427371486,
+          "p95": 0.04573575853636222,
+          "p99": 0.04848520634230226,
+          "max": 0.053713216579386165
+        },
+        "e2e": {
+          "count": 14693,
+          "mean": 0.4899064407253585,
+          "median": 0.36038556904532015,
+          "p90": 0.5404754143208267,
+          "p95": 1.6779554325155912,
+          "p99": 5.301328057721257,
+          "max": 6.523628619033843
+        }
+      },
+      "jct_seconds": {
+        "count": 1274,
+        "mean": 5.873395650021277,
+        "median": 5.701235365238972,
+        "p90": 9.185376003920101,
+        "p95": 11.538550461665727,
+        "p99": 13.539837048142216,
+        "max": 14.616242909803987
+      },
+      "prefix_cache": {
+        "query_tokens": 27211357.0,
+        "hit_tokens": 23647216.0,
+        "miss_tokens": 3564141.0,
+        "token_hit_rate": 0.8690200933382337,
+        "miss_rate": 0.1309799066617663
+      },
+      "preemptions": 0.0,
+      "ttl": {
+        "matched_events": 13419,
+        "unmatched_events": 0,
+        "hit_count": 5929,
+        "timeout_count": 7490,
+        "hit_rate": 0.44183620239958266,
+        "timeout_rate": 0.5581637976004173,
+        "seconds": {
+          "count": 13419,
+          "mean": 0.05245662471123035,
+          "median": 0.0,
+          "p90": 0.103253,
+          "p95": 0.107755,
+          "p99": 0.12797065999999888,
+          "max": 2.0
+        },
+        "history_source_counts": {
+          "fixed_cold_start": 75,
+          "global_history": 305,
+          "per_tool_history": 13039
+        }
+      },
+      "kv_sample_metrics": {
+        "continuum_active_blocks": {
+          "count": 524,
+          "mean": 2672.8454198473282,
+          "median": 1976.5,
+          "p90": 5439.5,
+          "p95": 5936.449999999999,
+          "p99": 6431.65,
+          "max": 6780.0
+        },
+        "continuum_active_unpinned_blocks": {
+          "count": 524,
+          "mean": 1629.395038167939,
+          "median": 1210.5,
+          "p90": 3746.9999999999995,
+          "p95": 4126.749999999999,
+          "p99": 4621.78,
+          "max": 5710.0
+        },
+        "continuum_evictable_cached_blocks": {
+          "count": 524,
+          "mean": 5548.570610687023,
+          "median": 5738.5,
+          "p90": 8556.4,
+          "p95": 8734.25,
+          "p99": 8904.01,
+          "max": 9055.0
+        },
+        "continuum_evicted_blocks_total": {
+          "count": 524,
+          "mean": 9388.309160305344,
+          "median": 12652.5,
+          "p90": 15923.9,
+          "p95": 16321.05,
+          "p99": 16653.77,
+          "max": 16781.0
+        },
+        "continuum_free_blocks": {
+          "count": 524,
+          "mean": 6693.471374045802,
+          "median": 7262.5,
+          "p90": 9112.1,
+          "p95": 9327.1,
+          "p99": 9530.0,
+          "max": 9530.0
+        },
+        "continuum_pin_events_total": {
+          "count": 524,
+          "mean": 380.22137404580155,
+          "median": 410.0,
+          "p90": 648.0,
+          "p95": 692.8499999999999,
+          "p99": 739.8499999999999,
+          "max": 747.0
+        },
+        "continuum_pinned_blocks": {
+          "count": 524,
+          "mean": 1043.4503816793892,
+          "median": 958.5,
+          "p90": 2024.0,
+          "p95": 2339.2,
+          "p99": 2682.659999999999,
+          "max": 3255.0
+        },
+        "continuum_pinned_requests": {
+          "count": 524,
+          "mean": 7.200381679389313,
+          "median": 6.0,
+          "p90": 14.0,
+          "p95": 16.0,
+          "p99": 20.0,
+          "max": 27.0
+        },
+        "continuum_running_blocks": {
+          "count": 524,
+          "mean": 1951.956106870229,
+          "median": 1479.0,
+          "p90": 4237.6,
+          "p95": 4717.85,
+          "p99": 5196.509999999998,
+          "max": 6310.0
+        },
+        "continuum_shared_pinned_running_blocks": {
+          "count": 524,
+          "mean": 322.5610687022901,
+          "median": 231.5,
+          "p90": 760.0,
+          "p95": 886.7999999999997,
+          "p99": 1322.5999999999985,
+          "max": 1469.0
+        },
+        "continuum_total_blocks": {
+          "count": 524,
+          "mean": 9366.31679389313,
+          "median": 9530.0,
+          "p90": 9530.0,
+          "p95": 9530.0,
+          "p99": 9530.0,
+          "max": 9530.0
+        },
+        "continuum_true_free_blocks": {
+          "count": 524,
+          "mean": 1144.9007633587787,
+          "median": 411.5,
+          "p90": 4254.299999999999,
+          "p95": 6949.499999999978,
+          "p99": 9275.31,
+          "max": 9401.0
+        },
+        "continuum_unpin_events_total": {
+          "count": 524,
+          "mean": 373.0209923664122,
+          "median": 403.0,
+          "p90": 645.5,
+          "p95": 689.6999999999999,
+          "p99": 739.3899999999999,
+          "max": 747.0
+        },
+        "kv_cache_usage_perc": {
+          "count": 524,
+          "mean": 0.28046646588114665,
+          "median": 0.20739769150052467,
+          "p90": 0.5707764952780693,
+          "p95": 0.6229223504721929,
+          "p99": 0.6748845750262328,
+          "max": 0.7114375655823715
+        },
+        "num_requests_running": {
+          "count": 524,
+          "mean": 21.213740458015266,
+          "median": 16.0,
+          "p90": 47.0,
+          "p95": 52.0,
+          "p99": 58.0,
+          "max": 68.0
+        },
+        "num_requests_waiting": {
+          "count": 524,
+          "mean": 21.759541984732824,
+          "median": 0.0,
+          "p90": 72.0,
+          "p95": 85.84999999999997,
+          "p99": 108.76999999999998,
+          "max": 114.0
+        }
+      },
+      "ucm": {
+        "offload_decisions": 0.0,
+        "what_decisions": 0.0,
+        "tier_create_events": 0.0,
+        "tier_dump_events": 0.0,
+        "tier_load_events": 0.0,
+        "when_select_rate": null,
+        "what_retain_rate": null,
+        "what_prune_rate": null
+      },
+      "ucm_reason_counts": {},
+      "ucm_event_counts": {},
+      "storage": {
+        "ssd_store_gib_per_shard": {
+          "count": 0,
+          "mean": null,
+          "median": null,
+          "p90": null,
+          "p95": null,
+          "p99": null,
+          "max": null
+        },
+        "ssd_store_bytes_per_shard": {
+          "count": 0,
+          "mean": null,
+          "median": null,
+          "p90": null,
+          "p95": null,
+          "p99": null,
+          "max": null
+        },
+        "note": "Per-shard end footprint. Shards ran sequentially and backing stores were cleaned between runs; do not sum as simultaneous disk requirement."
+      }
+    },
+    "F": {
+      "identity": {
+        "case": "F",
+        "name": "full_system",
+        "shards": 9,
+        "trajectories": 1274,
+        "tool_events": 13419,
+        "expected_requests": 14693,
+        "concurrency": 128,
+        "reset_aware_prefix": true
+      },
+      "correctness": {
+        "requests_total": 14693,
+        "success": 14693,
+        "failed": 0,
+        "success_rate": 1.0
+      },
+      "elapsed_seconds": 134.50013413233683,
+      "tokens": {
+        "input": 27211357,
+        "output": 108626,
+        "total": 27319983,
+        "request_throughput_req_per_s": 109.24152674482335,
+        "input_throughput_tok_per_s": 202314.72017140378,
+        "output_throughput_tok_per_s": 807.6274473683509,
+        "total_throughput_tok_per_s": 203122.34761877212
+      },
+      "latency_seconds": {
+        "ttft": {
+          "count": 14693,
+          "mean": 0.32740599571703194,
+          "median": 0.11935181613080204,
+          "p90": 0.2802897385787219,
+          "p95": 1.428572540590537,
+          "p99": 5.3964822501968595,
+          "max": 7.1073640659451485
+        },
+        "tpot": {
+          "count": 13419,
+          "mean": 0.0315320858764763,
+          "median": 0.04025268288595336,
+          "p90": 0.04783253915208791,
+          "p95": 0.0493160766715716,
+          "p99": 0.05205315149522253,
+          "max": 0.05856999512096601
+        },
+        "e2e": {
+          "count": 14693,
+          "mean": 0.5290050054743786,
+          "median": 0.3941035799216479,
+          "p90": 0.5782139578834182,
+          "p95": 1.7226506688632033,
+          "p99": 5.718301640013232,
+          "max": 7.438277370063588
+        }
+      },
+      "jct_seconds": {
+        "count": 1274,
+        "mean": 6.325111645692009,
+        "median": 6.109564905054867,
+        "p90": 9.915680716489442,
+        "p95": 12.583640274079508,
+        "p99": 14.572339893619063,
+        "max": 15.304410848999396
+      },
+      "prefix_cache": {
+        "query_tokens": 27211357.0,
+        "hit_tokens": 23643264.0,
+        "miss_tokens": 3568093.0,
+        "token_hit_rate": 0.868874859860903,
+        "miss_rate": 0.13112514013909704
+      },
+      "preemptions": 0.0,
+      "ttl": {
+        "matched_events": 13419,
+        "unmatched_events": 0,
+        "hit_count": 6224,
+        "timeout_count": 7195,
+        "hit_rate": 0.46381995677770327,
+        "timeout_rate": 0.5361800432222967,
+        "seconds": {
+          "count": 13419,
+          "mean": 0.0792814939265221,
+          "median": 0.0,
+          "p90": 0.108848,
+          "p95": 0.112021,
+          "p99": 2.0,
+          "max": 2.0
+        },
+        "history_source_counts": {
+          "fixed_cold_start": 242,
+          "global_history": 398,
+          "per_tool_history": 12779
+        }
+      },
+      "kv_sample_metrics": {
+        "continuum_active_blocks": {
+          "count": 560,
+          "mean": 2710.2517857142857,
+          "median": 2105.0,
+          "p90": 5466.3,
+          "p95": 5816.599999999999,
+          "p99": 6223.789999999999,
+          "max": 6832.0
+        },
+        "continuum_active_unpinned_blocks": {
+          "count": 560,
+          "mean": 1617.9232142857143,
+          "median": 1130.5,
+          "p90": 3681.3,
+          "p95": 4188.0,
+          "p99": 4586.949999999997,
+          "max": 5356.0
+        },
+        "continuum_evictable_cached_blocks": {
+          "count": 560,
+          "mean": 5517.726785714286,
+          "median": 5453.0,
+          "p90": 8518.2,
+          "p95": 8694.15,
+          "p99": 8925.33,
+          "max": 9007.0
+        },
+        "continuum_evicted_blocks_total": {
+          "count": 560,
+          "mean": 9311.658928571429,
+          "median": 12205.5,
+          "p90": 15955.6,
+          "p95": 16350.599999999999,
+          "p99": 17862.76,
+          "max": 18061.0
+        },
+        "continuum_free_blocks": {
+          "count": 560,
+          "mean": 6649.569642857143,
+          "median": 7205.5,
+          "p90": 9032.0,
+          "p95": 9306.05,
+          "p99": 9530.0,
+          "max": 9530.0
+        },
+        "continuum_pin_events_total": {
+          "count": 560,
+          "mean": 404.20535714285717,
+          "median": 434.0,
+          "p90": 674.1,
+          "p95": 712.05,
+          "p99": 784.5599999999995,
+          "max": 834.0
+        },
+        "continuum_pinned_blocks": {
+          "count": 560,
+          "mean": 1092.3285714285714,
+          "median": 1037.5,
+          "p90": 2047.2000000000003,
+          "p95": 2248.05,
+          "p99": 2718.46,
+          "max": 3091.0
+        },
+        "continuum_pinned_requests": {
+          "count": 560,
+          "mean": 7.892857142857143,
+          "median": 6.5,
+          "p90": 16.0,
+          "p95": 19.0,
+          "p99": 24.409999999999968,
+          "max": 33.0
+        },
+        "continuum_running_blocks": {
+          "count": 560,
+          "mean": 1967.2660714285714,
+          "median": 1471.5,
+          "p90": 4328.3,
+          "p95": 4665.2,
+          "p99": 5262.829999999998,
+          "max": 5614.0
+        },
+        "continuum_shared_pinned_running_blocks": {
+          "count": 560,
+          "mean": 349.34285714285716,
+          "median": 225.0,
+          "p90": 841.3000000000001,
+          "p95": 990.2499999999998,
+          "p99": 1243.1999999999994,
+          "max": 1591.0
+        },
+        "continuum_total_blocks": {
+          "count": 560,
+          "mean": 9359.82142857143,
+          "median": 9530.0,
+          "p90": 9530.0,
+          "p95": 9530.0,
+          "p99": 9530.0,
+          "max": 9530.0
+        },
+        "continuum_true_free_blocks": {
+          "count": 560,
+          "mean": 1131.8428571428572,
+          "median": 401.0,
+          "p90": 4004.3,
+          "p95": 6401.1,
+          "p99": 9367.96,
+          "max": 9492.0
+        },
+        "continuum_unpin_events_total": {
+          "count": 560,
+          "mean": 396.3125,
+          "median": 429.0,
+          "p90": 669.2,
+          "p95": 706.05,
+          "p99": 781.7399999999996,
+          "max": 834.0
+        },
+        "kv_cache_usage_perc": {
+          "count": 560,
+          "mean": 0.2843915829710688,
+          "median": 0.22088142707240294,
+          "p90": 0.5735886673662121,
+          "p95": 0.6103462749213011,
+          "p99": 0.6530734522560335,
+          "max": 0.716894018887723
+        },
+        "num_requests_running": {
+          "count": 560,
+          "mean": 21.444642857142856,
+          "median": 15.0,
+          "p90": 48.0,
+          "p95": 51.0,
+          "p99": 58.40999999999997,
+          "max": 64.0
+        },
+        "num_requests_waiting": {
+          "count": 560,
+          "mean": 21.985714285714284,
+          "median": 0.0,
+          "p90": 71.0,
+          "p95": 85.04999999999995,
+          "p99": 110.40999999999997,
+          "max": 115.0
+        }
+      },
+      "ucm": {
+        "offload_decisions": 14993.0,
+        "when_candidates": 216391.0,
+        "when_effective": 41370.0,
+        "when_selected": 0.0,
+        "when_skipped": 216391.0,
+        "what_decisions": 15088.0,
+        "what_candidates": 0.0,
+        "what_retained": 0.0,
+        "what_pruned": 0.0,
+        "tier_create_events": 0.0,
+        "tier_dump_events": 0.0,
+        "tier_load_events": 0.0,
+        "when_select_rate": 0.0,
+        "what_retain_rate": null,
+        "what_prune_rate": null
+      },
+      "ucm_reason_counts": {
+        "UCM_OFFLOAD_DECISION:joint_cost_full_skip": 567,
+        "UCM_OFFLOAD_DECISION:joint_cost_full_zero_evict_skip": 14426,
+        "UCM_WHAT_DECISION:frontier_tail": 15088
+      },
+      "ucm_event_counts": {
+        "UCM_OFFLOAD_DECISION": 14993,
+        "UCM_WHAT_DECISION": 15088
+      },
+      "storage": {
+        "ssd_store_gib_per_shard": {
+          "count": 9,
+          "mean": 3.2368633482191297e-07,
+          "median": 3.241002559661865e-07,
+          "p90": 3.241002559661865e-07,
+          "p95": 3.241002559661865e-07,
+          "p99": 3.241002559661865e-07,
+          "max": 3.241002559661865e-07
+        },
+        "ssd_store_bytes_per_shard": {
+          "count": 9,
+          "mean": 347.55555555555554,
+          "median": 348.0,
+          "p90": 348.0,
+          "p95": 348.0,
+          "p99": 348.0,
+          "max": 348.0
+        },
+        "note": "Per-shard end footprint. Shards ran sequentially and backing stores were cleaned between runs; do not sum as simultaneous disk requirement."
+      }
+    }
+  },
+  "comparisons": {
+    "C_vs_V": {
+      "new_case": "C",
+      "baseline_case": "V",
+      "request_throughput_delta_percent": 45.973953028038636,
+      "total_token_throughput_delta_percent": 45.973953028038636,
+      "prefix_hit_rate_delta_percentage_points": 21.731808523918893,
+      "ttft_mean_delta_percent": -64.18426377054315,
+      "e2e_mean_delta_percent": -49.78352180634729,
+      "jct_mean_delta_percent": -48.78063173873098
+    },
+    "F_vs_V": {
+      "new_case": "F",
+      "baseline_case": "V",
+      "request_throughput_delta_percent": 36.62623433442296,
+      "total_token_throughput_delta_percent": 36.62623433442293,
+      "prefix_hit_rate_delta_percentage_points": 21.71728517618582,
+      "ttft_mean_delta_percent": -61.22759476305086,
+      "e2e_mean_delta_percent": -45.775833682845025,
+      "jct_mean_delta_percent": -44.8414099817766
+    },
+    "U_vs_V": {
+      "new_case": "U",
+      "baseline_case": "V",
+      "request_throughput_delta_percent": -67.66360550346822,
+      "total_token_throughput_delta_percent": -67.66360550346822,
+      "prefix_hit_rate_delta_percentage_points": 1.988640257815888,
+      "ttft_mean_delta_percent": 230.7925449508185,
+      "e2e_mean_delta_percent": 290.3366340491955,
+      "jct_mean_delta_percent": 284.94377370842267
+    },
+    "F_vs_C": {
+      "new_case": "F",
+      "baseline_case": "C",
+      "request_throughput_delta_percent": -6.403689493714115,
+      "total_token_throughput_delta_percent": -6.403689493714115,
+      "prefix_hit_rate_delta_percentage_points": -0.014523347733075287,
+      "ttft_mean_delta_percent": 8.255223314551241,
+      "e2e_mean_delta_percent": 7.980822765083584,
+      "jct_mean_delta_percent": 7.690883137918614
+    }
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "definition": "Full runtime-eligible EnvBench trajectory workload under the frozen 4096-token serving configuration",
+  "selection_policy": {
+    "whole_trajectory_preserved": true,
+    "min_input_tokens": 1,
+    "max_input_tokens": 4000,
+    "pressure_padding": false,
+    "high_contention_scoring": false,
+    "sampling": false,
+    "turn_truncation": false,
+    "context_resets_preserved": true
+  },
+  "source": {
+    "path": "/root/autodl-tmp/vllm_workspace/experiments/vllm_prefix_experiment/results/continuum/envbench_ttl_trace/envbench_ttl_events_all.csv",
+    "trajectories": 3677,
+    "events": 54078
+  },
+  "accepted": {
+    "trajectories": 1274,
+    "events": 13419,
+    "expected_requests": 14693,
+    "input_tokens_total": 24822191
+  },
+  "rejected": {
+    "trajectories": 2403,
+    "reasons": {
+      "input_tokens_above_max": 2403
+    }
+  },
+  "input_tokens": {
+    "count": 13419,
+    "min": 433.0,
+    "mean": 1849.7794917654073,
+    "median": 1755.0,
+    "p90": 3142.0,
+    "p95": 3429.0,
+    "p99": 3804.0,
+    "max": 3997.0
+  },
+  "input_token_bins": {
+    "<=1000": 2695,
+    "1001-2000": 5127,
+    "2001-3500": 5049,
+    "3501-4000": 548
+  },
+  "tool_duration_seconds": {
+    "count": 13419,
+    "min": 0.003685,
+    "mean": 2.9075458853863925,
+    "median": 0.033658,
+    "p90": 0.2993102,
+    "p95": 1.4452674999999997,
+    "p99": 19.734490559999877,
+    "max": 2078.237639
+  },
+  "events_per_trajectory": {
+    "count": 1274,
+    "min": 1.0,
+    "mean": 10.532967032967033,
+    "median": 7.0,
+    "p90": 20.0,
+    "p95": 39.34999999999991,
+    "p99": 63.26999999999998,
+    "max": 85.0
+  },
+  "context_resets": {
+    "trajectories_with_reset": 652,
+    "trajectories_without_reset": 622,
+    "reset_events": 652,
+    "drop_tokens": {
+      "count": 652,
+      "min": 104,
+      "mean": 1726.8098159509202,
+      "median": 1717.5,
+      "p90": 3001.8,
+      "p95": 3231.499999999999,
+      "p99": 3478.92,
+      "max": 3542
+    },
+    "before_reset_tokens": {
+      "count": 652,
+      "min": 660,
+      "mean": 2327.946319018405,
+      "median": 2346.5,
+      "p90": 3524.8,
+      "p95": 3727.8999999999987,
+      "p99": 3927.37,
+      "max": 3988
+    },
+    "after_reset_tokens": {
+      "count": 652,
+      "min": 433,
+      "mean": 601.1365030674847,
+      "median": 434.0,
+      "p90": 1130.0,
+      "p95": 1558.0,
+      "p99": 2343.98,
+      "max": 3061
+    }
+  },
+  "environment_trajectories": {
+    "jvm": 939,
+    "python": 335
+  },
+  "agent_config_trajectories": {
+    "bash_agent-4o": 78,
+    "bash_agent-4o-mini": 54,
+    "installamatic_agent-4o": 555,
+    "installamatic_agent-4o-mini": 587
+  },
+  "tool_events": {
+    "check_presence": 2649,
+    "execute_bash_command": 772,
+    "get_directory_contents": 2845,
+    "get_file_contents": 3761,
+    "inspect_header": 2222,
+    "submit_documentation": 1170
+  }
+}

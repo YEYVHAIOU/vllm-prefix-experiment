@@ -1,0 +1,4 @@
+canonical_source_commit=6e7d571b831e6e4b82f1b2f8228cc84e9a0261a2
+canonical_source_tag=vllm-continuum-final-20260820
+runtime_reported_vllm_version=0.1.dev10+g05f00f8a8
+note=runtime version string is generated/install-time identity; canonical project source identity is commit+tag above

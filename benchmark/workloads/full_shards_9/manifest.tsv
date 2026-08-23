@@ -1,0 +1,10 @@
+shard	path	trajectories	events	expected_requests	input_tokens	reset_events	sha256
+00	/root/autodl-tmp/vllm_deploy_clean_20260820/benchmark/workloads/full_shards_9/shard_00.csv	142	1452	1594	2758233	72	ef664c330e54250b8928727c5abb2d1e4cb5d656975814b0d7df9f8b40d1ebd8
+01	/root/autodl-tmp/vllm_deploy_clean_20260820/benchmark/workloads/full_shards_9/shard_01.csv	142	1493	1635	2758186	71	e2bccd35c2063079ff38d04ea63c95967e7a129aa0308f414b5e444ad5fd3397
+02	/root/autodl-tmp/vllm_deploy_clean_20260820/benchmark/workloads/full_shards_9/shard_02.csv	142	1463	1605	2758181	70	414c1cce30f7b0898660c17711d088108d152a03ed0b95b05bc14cab1348b88b
+03	/root/autodl-tmp/vllm_deploy_clean_20260820/benchmark/workloads/full_shards_9/shard_03.csv	142	1482	1624	2758206	69	a963ad0636ae646fdcb00aa0a62dd6ebb980d2157e0c1eb38463ffed88c895ce
+04	/root/autodl-tmp/vllm_deploy_clean_20260820/benchmark/workloads/full_shards_9/shard_04.csv	142	1541	1683	2758231	74	f85a74d450db374c2f43f90643a63ef01ba54202fa2f6fcbe4245006c3fa5dbc
+05	/root/autodl-tmp/vllm_deploy_clean_20260820/benchmark/workloads/full_shards_9/shard_05.csv	141	1481	1622	2757753	70	2ee078dc32ee13c2eae22b9a422d9af212f9761d868914dc7bcd68e524cb2188
+06	/root/autodl-tmp/vllm_deploy_clean_20260820/benchmark/workloads/full_shards_9/shard_06.csv	141	1484	1625	2757759	70	0db1cab593cbdf62a51cc3bbd715f46539817b8e59fde90ceab04d1ea21e4961
+07	/root/autodl-tmp/vllm_deploy_clean_20260820/benchmark/workloads/full_shards_9/shard_07.csv	141	1515	1656	2757885	82	9a3012439cc69203d5ef6975a80cb4f3ccecc5f7bbbf7c1fff8f97a4dae90664
+08	/root/autodl-tmp/vllm_deploy_clean_20260820/benchmark/workloads/full_shards_9/shard_08.csv	141	1508	1649	2757757	74	ea837e95992563fc699cfc310e7ebd102787be907144499110a0e308f6af6963

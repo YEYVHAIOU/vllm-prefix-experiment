@@ -1,0 +1,114 @@
+{
+  "input": "/root/autodl-tmp/vllm_deploy_clean_20260820/benchmark/workloads/envbench_full_runtime_eligible_max4000.csv",
+  "input_sha256": "0c0dff4e7ea9204a3ba6f67e581326920a5075216fb4d2f94f97d2b6cb248b84",
+  "shards": 9,
+  "source": {
+    "trajectories": 1274,
+    "events": 13419,
+    "input_tokens": 24822191
+  },
+  "capacities": [
+    142,
+    142,
+    142,
+    142,
+    142,
+    141,
+    141,
+    141,
+    141
+  ],
+  "coverage_validation": "PASS",
+  "manifest": [
+    {
+      "shard": "00",
+      "path": "/root/autodl-tmp/vllm_deploy_clean_20260820/benchmark/workloads/full_shards_9/shard_00.csv",
+      "trajectories": 142,
+      "events": 1452,
+      "expected_requests": 1594,
+      "input_tokens": 2758233,
+      "reset_events": 72,
+      "sha256": "ef664c330e54250b8928727c5abb2d1e4cb5d656975814b0d7df9f8b40d1ebd8"
+    },
+    {
+      "shard": "01",
+      "path": "/root/autodl-tmp/vllm_deploy_clean_20260820/benchmark/workloads/full_shards_9/shard_01.csv",
+      "trajectories": 142,
+      "events": 1493,
+      "expected_requests": 1635,
+      "input_tokens": 2758186,
+      "reset_events": 71,
+      "sha256": "e2bccd35c2063079ff38d04ea63c95967e7a129aa0308f414b5e444ad5fd3397"
+    },
+    {
+      "shard": "02",
+      "path": "/root/autodl-tmp/vllm_deploy_clean_20260820/benchmark/workloads/full_shards_9/shard_02.csv",
+      "trajectories": 142,
+      "events": 1463,
+      "expected_requests": 1605,
+      "input_tokens": 2758181,
+      "reset_events": 70,
+      "sha256": "414c1cce30f7b0898660c17711d088108d152a03ed0b95b05bc14cab1348b88b"
+    },
+    {
+      "shard": "03",
+      "path": "/root/autodl-tmp/vllm_deploy_clean_20260820/benchmark/workloads/full_shards_9/shard_03.csv",
+      "trajectories": 142,
+      "events": 1482,
+      "expected_requests": 1624,
+      "input_tokens": 2758206,
+      "reset_events": 69,
+      "sha256": "a963ad0636ae646fdcb00aa0a62dd6ebb980d2157e0c1eb38463ffed88c895ce"
+    },
+    {
+      "shard": "04",
+      "path": "/root/autodl-tmp/vllm_deploy_clean_20260820/benchmark/workloads/full_shards_9/shard_04.csv",
+      "trajectories": 142,
+      "events": 1541,
+      "expected_requests": 1683,
+      "input_tokens": 2758231,
+      "reset_events": 74,
+      "sha256": "f85a74d450db374c2f43f90643a63ef01ba54202fa2f6fcbe4245006c3fa5dbc"
+    },
+    {
+      "shard": "05",
+      "path": "/root/autodl-tmp/vllm_deploy_clean_20260820/benchmark/workloads/full_shards_9/shard_05.csv",
+      "trajectories": 141,
+      "events": 1481,
+      "expected_requests": 1622,
+      "input_tokens": 2757753,
+      "reset_events": 70,
+      "sha256": "2ee078dc32ee13c2eae22b9a422d9af212f9761d868914dc7bcd68e524cb2188"
+    },
+    {
+      "shard": "06",
+      "path": "/root/autodl-tmp/vllm_deploy_clean_20260820/benchmark/workloads/full_shards_9/shard_06.csv",
+      "trajectories": 141,
+      "events": 1484,
+      "expected_requests": 1625,
+      "input_tokens": 2757759,
+      "reset_events": 70,
+      "sha256": "0db1cab593cbdf62a51cc3bbd715f46539817b8e59fde90ceab04d1ea21e4961"
+    },
+    {
+      "shard": "07",
+      "path": "/root/autodl-tmp/vllm_deploy_clean_20260820/benchmark/workloads/full_shards_9/shard_07.csv",
+      "trajectories": 141,
+      "events": 1515,
+      "expected_requests": 1656,
+      "input_tokens": 2757885,
+      "reset_events": 82,
+      "sha256": "9a3012439cc69203d5ef6975a80cb4f3ccecc5f7bbbf7c1fff8f97a4dae90664"
+    },
+    {
+      "shard": "08",
+      "path": "/root/autodl-tmp/vllm_deploy_clean_20260820/benchmark/workloads/full_shards_9/shard_08.csv",
+      "trajectories": 141,
+      "events": 1508,
+      "expected_requests": 1649,
+      "input_tokens": 2757757,
+      "reset_events": 74,
+      "sha256": "ea837e95992563fc699cfc310e7ebd102787be907144499110a0e308f6af6963"
+    }
+  ]
+}

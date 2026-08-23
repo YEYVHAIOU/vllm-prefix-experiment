@@ -1,0 +1,35 @@
+{
+  "name": "envbench_high_contention_balanced_min3500.csv",
+  "type": "EnvBench-derived trajectory-preserving high-contention runtime workload",
+  "tool_events": 1225,
+  "trajectories": 76,
+  "terminal_requests": 76,
+  "expected_total_requests": 1301,
+  "tools": {
+    "execute_bash_command": 10,
+    "get_directory_contents": 359,
+    "get_file_contents": 365,
+    "check_presence": 141,
+    "inspect_header": 263,
+    "submit_documentation": 87
+  },
+  "input_tokens": {
+    "min": 3500,
+    "mean": 3505.086530612245,
+    "median": 3500,
+    "max": 3988
+  },
+  "original_input_tokens": {
+    "min": 433,
+    "mean": 1625.187755102041,
+    "median": 1451,
+    "max": 3988
+  },
+  "duration_seconds": {
+    "min": 0.004919,
+    "mean": 1.1336443665306124,
+    "median": 0.028315,
+    "max": 386.264591
+  },
+  "pressure_enhanced": true
+}

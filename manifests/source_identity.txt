@@ -1,0 +1,9 @@
+=== VLLM ===
+joint-offload-v1
+6e7d571b831e6e4b82f1b2f8228cc84e9a0261a2
+vllm-continuum-final-20260820
+
+=== UCM ===
+joint-offload-v1
+be59181f50e515496a7f19a38178c8c2a05cf251
+ucm-continuum-final-20260822

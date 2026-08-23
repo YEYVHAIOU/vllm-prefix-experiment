@@ -1,0 +1,17 @@
+*.log
+*.tmp
+*.pyc
+__pycache__/
+.ipynb_checkpoints/
+.venv/
+venv/
+.env
+models/
+runtime/
+pooled_requests/
+pooled_jct/
+*.tar.gz
+*.bundle
+*.pem
+id_ed25519
+id_ed25519.pub
