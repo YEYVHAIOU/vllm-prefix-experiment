@@ -88,16 +88,21 @@ vllm_deploy_clean_20260820/
 └── README.md
 ```
 
-### 3.1 `source/`
+### 3.1 Frozen Release 中的 `source/`
 
-`source/` 是纯 Git tracked source 交付：
+本节描述完整冻结 release 中的源码快照。GitHub 精简版不再重复包含 `source/`，而是使用两个独立源码仓库：
+
+- <https://github.com/YEYVHAIOU/vllm-continuum>
+- <https://github.com/YEYVHAIOU/unified-cache-management-continuum>
+
+冻结 release 中的 `source/` 是纯 Git tracked source 交付：
 
 - `source/vllm-continuum/`：3233 个源码文件；
 - `source/unified-cache-management/`：438 个源码文件；
 - 不包含 `.so`、`.pyc`、`__pycache__` 和生成的 `_version.py`；
 - 适合代码审查、GitHub 发布、源码重建和版本追溯。
 
-### 3.2 `deployment/runtime/golden/`
+### 3.2 Frozen Release 中的 `deployment/runtime/golden/`
 
 Golden Runtime 是“已验证运行树”，由纯源码副本加当前机器 / Python / CUDA 栈所需生成产物构成。
 
@@ -274,20 +279,33 @@ UCM_TRANSFER_PROFILE=0
 
 ## 6. 启动服务
 
-进入部署根目录后：
+GitHub 精简版默认采用三个仓库并列的目录结构，并要求显式指定本机 Python 环境和模型目录：
+
+```text
+workspace/
+├── vllm-prefix-experiment/
+├── vllm-continuum/
+└── unified-cache-management-continuum/
+```
+
+进入主仓库后：
 
 ```bash
-./deployment/scripts/start_full.sh
+export VENV_PATH=/path/to/your/vllm-environment
+export MODEL_PATH=/path/to/Qwen3-0.6B
+bash deployment/scripts/start_full.sh
 ```
+
+如源码仓库不在同级目录，可额外设置 `VLLM_REPO` 和 `UCM_REPO`。
 
 脚本会：
 
 1. 加载 `full_system.env`；
-2. 默认使用 `deployment/runtime/golden/` 下的 vLLM / UCM；
+2. 默认使用同级目录中的 `../vllm-continuum` 和 `../unified-cache-management-continuum`，也可通过 `VLLM_REPO` / `UCM_REPO` 覆盖；
 3. 检查 Python、vLLM executable、模型、源码树和端口；
 4. 创建 runtime state、run directory 和 SSD store；
 5. 生成 `kv_transfer_config.json`；
-6. 使用 `PYTHONPATH=<golden UCM>:<golden vLLM>` 启动服务；
+6. 使用 `PYTHONPATH=$UCM_REPO:$VLLM_REPO` 启动服务；
 7. 保存 PID 和运行目录。
 
 典型输出：
@@ -655,21 +673,21 @@ smoke_test.sh
 
 因此：
 
-> `source/` 是长期可维护源码交付；`deployment/runtime/golden/` 是当前已验证二进制运行快照。
+> 在完整冻结 release 中，`source/` 是长期可维护源码快照，`deployment/runtime/golden/` 是当时已验证的二进制运行快照。GitHub 精简版不提交 Golden Runtime，而是使用两个独立源码仓库。
 
-两者用途不同。
+冻结交付与 GitHub 可复现仓库用途不同。
 
 ---
 
 ## 18. 模型与数据集不纳入源码目录
 
-当前模型：
+原 AutoDL 最终验证环境中的模型路径：
 
 ```text
 /root/autodl-tmp/vllm_workspace/models/Qwen3-0.6B
 ```
 
-当前 raw EnvBench：
+原 AutoDL 最终验证环境中的 raw EnvBench 路径：
 
 ```text
 /root/autodl-tmp/vllm_workspace/datasets/envbench_trajectories_raw
@@ -677,9 +695,9 @@ smoke_test.sh
 
 模型约 1.5 GiB，raw EnvBench 约 2.0 GiB。
 
-这些大资产不复制到 `source/`。
+这些大资产不纳入 GitHub 精简仓库；完整冻结 release 中也与源码快照保持分离。
 
-部署配置通过 `MODEL_PATH` 指向模型。
+GitHub 部署时通过环境变量 `MODEL_PATH` 指向本地模型目录。
 
 压力/容量 benchmark 使用的已冻结 workload：
 
