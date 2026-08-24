@@ -1,26 +1,27 @@
 # vLLM + Continuum + UCM
 
-**Cost-aware KV Cache management for long-context, multi-turn Agent serving**
+面向长上下文、多轮 Agent 服务的 KV Cache 管理实验系统。
 
-This repository contains the deployment, benchmark, workload-construction, and final evaluation artifacts for a research integration of **vLLM**, **Continuum-style temporal KV retention**, and **Unified Cache Management (UCM)**.
+本项目在 vLLM 的 Prefix Cache / PagedAttention 基础上集成 Continuum 风格的时序感知 KV 驻留机制，并接入 Unified Cache Management（UCM）的外部 KV 管理路径，用于研究高并发多轮 Agent 场景中“工具调用间隔导致可复用前缀被提前驱逐”的问题。
 
-The project targets multi-turn Agent workloads in which long reusable prefixes are separated by tool-call gaps. Under high concurrency, these gaps can cause otherwise reusable KV Cache blocks to be evicted before the next turn arrives.
+最终系统由 **Dynamic TTL + 成本感知 UCM + Frontier-Tail + TieredStore** 组成。项目同时提供源码、部署脚本、EnvBench 派生服务系统回放、压力测试和最终实验结果。
 
-> This repository is a research integration artifact and is **not** an official vLLM, Continuum, UCM, or EnvBench distribution.
+> 本仓库是研究集成项目，不是 vLLM、Continuum、UCM 或 EnvBench 的官方发行版。
 
----
+## 问题背景
 
-## 1. Project overview
+多轮 Agent 请求通常具有很长的共享前缀。一次模型调用结束后，Agent 可能进入文件读取、搜索、Shell 命令或其他工具执行；下一轮请求回来时，大部分历史上下文仍然可以复用。
 
-The final system combines two complementary mechanisms:
+在高并发服务中，不同 Agent 会共同竞争有限的 GPU KV Cache。工具调用造成的等待间隔使同一 Agent 的前后两轮被其他请求隔开，原本可复用的 KV blocks 可能在下一轮返回前被驱逐，从而重新产生 Prefill 开销。
 
-- **Continuum / Dynamic TTL** — predicts how long reusable KV blocks should remain protected from eviction.
-- **UCM** — controls external KV migration through:
-  - **WHEN**: whether migration is worthwhile,
-  - **WHAT**: which blocks should be migrated,
-  - **WHERE**: where migrated blocks should be stored.
+本项目围绕两个互补问题展开：
 
-The final configuration is:
+- **Continuum / Dynamic TTL**：哪些 KV 值得在 GPU 中继续保留，以及应保留多久；
+- **UCM**：当 GPU 内继续保留不划算时，是否需要把 KV 放到外部层级，以及迁移哪些 blocks、放到哪里。
+
+## 最终系统
+
+最终配置为：
 
 ```text
 Dynamic TTL
@@ -32,30 +33,28 @@ Frontier-Tail WHAT (K=4)
 TieredStore WHERE (DRAM + SSD)
 ```
 
-Conceptually:
+逻辑关系：
 
 ```text
-Agent request
-     |
-     v
+Agent 请求
+    │
+    ▼
 GPU KV Cache
-     |
-     +-- Continuum / Dynamic TTL
-     |      `-- Which reusable blocks should remain protected?
-     |
-     `-- UCM
-            +-- WHEN  : Is migration cost-effective?
-            +-- WHAT  : Which KV blocks should migrate?
-            `-- WHERE : DRAM / SSD
+    │
+    ├── Continuum / Dynamic TTL
+    │     估计未来复用间隔与 GPU 内驻留价值
+    │
+    └── UCM
+          ├── WHEN：是否值得迁移
+          ├── WHAT：迁移哪些 KV blocks
+          └── WHERE：DRAM / SSD
 ```
 
-`Frontier-Tail` in this project is a project-specific sparse external KV backing / partial-retention policy. It should **not** be confused with UCM Sparse Attention.
+Frontier-Tail 是本项目实现的外部 KV 部分保留策略，不改变 Attention 计算语义，也不等价于 UCM 上游 Sparse Attention。
 
----
+## 仓库结构
 
-## 2. Repository layout
-
-The project is split into three Git repositories.
+项目采用三个 Git 仓库组织：
 
 ```text
 workspace/
@@ -64,325 +63,105 @@ workspace/
 └── unified-cache-management-continuum/
 ```
 
-### Main experiment repository
+### `vllm-prefix-experiment`
 
-This repository:
+当前主仓库，负责部署配置与脚本、V/U/C/F 基准测试、EnvBench 派生工作负载、最终聚合结果、环境与源码版本清单，以及部署、实验、兼容性和版本追溯文档。
 
-```text
-vllm-prefix-experiment/
-├── README.md
-├── docs/
-├── deployment/
-│   ├── configs/
-│   └── scripts/
-├── benchmark/
-│   ├── configs/
-│   ├── scripts/
-│   ├── workloads/
-│   └── results/
-└── manifests/
-```
+### `vllm-continuum`
 
-It contains:
+修改后的 vLLM / Continuum 源码：
 
-- deployment configuration and lifecycle scripts,
-- V/U/C/F benchmark runners,
-- EnvBench-derived serving workloads,
-- final aggregate benchmark results,
-- source and environment manifests,
-- compatibility and provenance documentation.
-
-Runtime logs, model weights, virtual environments, frozen Golden Runtime copies, and large raw request traces are intentionally excluded from Git.
-
-### Source repositories
-
-Modified vLLM + Continuum source:
-
-- https://github.com/YEYVHAIOU/vllm-continuum
-
-Modified UCM source:
-
-- https://github.com/YEYVHAIOU/unified-cache-management-continuum
-
----
-
-## 3. Frozen source identity
-
-### vLLM + Continuum
+<https://github.com/YEYVHAIOU/vllm-continuum>
 
 ```text
-branch : joint-offload-v1
-commit : 6e7d571b831e6e4b82f1b2f8228cc84e9a0261a2
-tag    : vllm-continuum-final-20260820
+branch = joint-offload-v1
+commit = 6e7d571b831e6e4b82f1b2f8228cc84e9a0261a2
+tag    = vllm-continuum-final-20260820
 ```
 
-### UCM
+### `unified-cache-management-continuum`
+
+修改后的 UCM 源码：
+
+<https://github.com/YEYVHAIOU/unified-cache-management-continuum>
 
 ```text
-branch : joint-offload-v1
-commit : be59181f50e515496a7f19a38178c8c2a05cf251
-tag    : ucm-continuum-final-20260822
+branch = joint-offload-v1
+commit = be59181f50e515496a7f19a38178c8c2a05cf251
+tag    = ucm-continuum-final-20260822
 ```
 
-The UCM commit above includes the final fix that initializes KV caches before the empty-load fast path.
+该版本包含正式基准测试前完成的空加载 KV Cache 初始化修正。
 
-See:
+## 四种实验配置
 
-- `manifests/source_identity.txt`
-- `manifests/final_release_identity.txt`
-- `docs/SOURCE_PROVENANCE.md`
+| 配置 | 调度器 | Continuum | UCM |
+|---|---|---:|---:|
+| **V** | FCFS | 关闭 | 关闭 |
+| **U** | FCFS | 关闭 | eager/full |
+| **C** | Continuum | 开启 | 关闭 |
+| **F** | Continuum | 开启 | 成本感知 |
 
----
+V、U、C、F 共享同一最终 vLLM/Continuum 代码基座，U/F 使用同一最终 UCM 代码版本，从而减少不同源码版本造成的实验混杂。
 
-## 4. Final tested environment
+## 正式 EnvBench 派生实验
 
-The final formal benchmark was run on an AutoDL instance with:
+正式评测使用 **EnvBench 派生的服务系统回放**。它保留 trajectory 结构、输入 token 长度、工具调用顺序与工具等待时间，并使用确定性的 token ID 前缀序列构造请求。
 
-```text
-GPU                 : NVIDIA GeForce RTX 4090
-GPU memory          : 24564 MiB
-CPU                 : 16 vCPU
-Host memory         : ~120 GB
-Python              : 3.12
-PyTorch             : 2.8.0+cu129
-vLLM package        : 0.1.dev10+g05f00f8a8
-CUDA_HOME tested    : /usr/local/cuda-12.8
-Model               : Qwen/Qwen3-0.6B
-Server max model len: 4096
-Max benchmark input : 4000 tokens
-Max output          : 8 tokens
-GPU memory util     : 0.80
-Swap space          : 1 GiB
-```
+该实验研究服务系统性能，不评估 EnvBench 的语义任务正确率。
 
-`MAX_MODEL_LEN=4096` is the serving-experiment cap used in this study, not the intrinsic maximum context length of the model.
+| 项目 | 数值 |
+|---|---:|
+| Trajectories | 1274 |
+| 工具事件 | 13419 |
+| 每种配置请求数 | 14693 |
+| 分片 | 9 |
+| 并发度 | 128 |
+| V/U/C/F 运行数 | 36 |
+| 总请求数 | 58772 |
+| 正确性验证 | 36 / 36 PASS |
 
-Exact environment snapshots are in `manifests/`.
+### 主要结果
 
----
-
-## 5. Benchmark cases
-
-The final comparison uses four serving configurations.
-
-| Case | Scheduler | Continuum | UCM |
-|---|---|---:|---|
-| **V** | FCFS | Off | Off |
-| **U** | FCFS | Off | eager / full |
-| **C** | Continuum | On | Off |
-| **F** | Continuum | On | cost-aware |
-
-Interpretation:
-
-- **V**: vLLM-style baseline.
-- **U**: baseline scheduling plus eager/full external KV migration.
-- **C**: Continuum / Dynamic TTL without UCM migration.
-- **F**: final combined system using Continuum and cost-aware UCM.
-
----
-
-## 6. Formal Full EnvBench-derived benchmark
-
-The final formal evaluation uses a **Full Runtime-Eligible EnvBench-derived serving replay**.
-
-```text
-Accepted trajectories : 1274
-Tool events           : 13419
-Requests per case     : 14693
-Cases                 : V / U / C / F
-Deterministic shards  : 9
-Concurrency           : 128
-Case runs             : 36
-Validation            : 36 / 36 PASS
-Total requests        : 58772
-```
-
-The accepted workload contains inputs up to 4000 tokens.
-
-### Important scope limitation
-
-This is an **EnvBench-derived serving-system replay** using deterministic token-ID prefix streams.
-
-It evaluates:
-
-- serving latency,
-- throughput,
-- KV Cache reuse,
-- KV occupancy,
-- external KV migration behavior,
-- scheduler / cache-policy effects.
-
-It does **not** evaluate semantic EnvBench task accuracy.
-
-Therefore, these results should not be interpreted as an EnvBench agent-task leaderboard score.
-
----
-
-## 7. Final results
-
-Aggregate results from the formal Full Runtime-Eligible EnvBench-derived benchmark:
-
-| Case | Req/s | Prefix Hit | Mean TTFT | Mean E2E | Mean JCT |
+| 配置 | Req/s | Prefix Cache 命中率 | Mean TTFT | Mean E2E | Mean JCT |
 |---|---:|---:|---:|---:|---:|
 | **V** | 79.96 | 65.17% | 0.844 s | 0.976 s | 11.467 s |
 | **U** | 25.86 | 67.16% | 2.793 s | 3.808 s | 44.142 s |
 | **C** | **116.72** | **86.90%** | **0.302 s** | **0.490 s** | **5.873 s** |
 | **F** | 109.24 | 86.89% | 0.327 s | 0.529 s | 6.325 s |
 
-The complete aggregate files are under:
+C 相比 V，请求吞吐提高约 **45.97%**，Prefix Cache 命中率从 **65.17%** 提升到 **86.90%**。平均 TTFT、E2E 和 JCT 均明显下降。
 
-```text
-benchmark/results/full_envbench_final_20260823/
-```
+U 使用 eager/full KV 外迁后，Prefix Cache 命中率只略有提高，但产生大量外部 KV I/O，吞吐和延迟显著恶化。
 
-including:
+F 中的成本感知策略在正式工作负载下没有选择实际 KV 外迁，避免了 U 中的大规模外部数据传输，同时保留了大部分 Continuum 收益。F 的正式结果因此反映“过滤收益不足的迁移”，而不是 SSD 外迁本身带来的加速。
 
-- `aggregate_summary.json`
-- `aggregate_summary.tsv`
-- `aggregate_comparison.md`
-- `manifest.tsv`
+完整方法、尾延迟、KV Cache 利用率、TTL 与 UCM 数据见 [`docs/BENCHMARK.md`](docs/BENCHMARK.md)。
 
----
+## GPU KV Cache 利用率
 
-## 8. Main findings
+正式并发 128 实验中：
 
-### Continuum is the primary performance gain
+| 配置 | Mean | P95 | P99 | Max |
+|---|---:|---:|---:|---:|
+| V | 10.21% | 31.44% | 50.91% | 62.35% |
+| U | 25.20% | 54.08% | 66.21% | 77.10% |
+| C | 28.05% | 62.29% | 67.49% | 71.14% |
+| F | **28.44%** | 61.03% | 65.31% | **71.69%** |
 
-Compared with V:
+项目还使用 `min3500` 高压力工作负载测试 C76、C96 和 C128。在 C128 的 C/F 运行中，GPU KV Cache 占用中位数约为 96%，同时所有预期请求仍然成功完成。详细结果见 [`docs/min3500_capacity_C76_C96_C128_final_summary.md`](docs/min3500_capacity_C76_C96_C128_final_summary.md)。
 
-```text
-Throughput:
-79.96 -> 116.72 req/s
+## 快速开始
 
-Prefix hit rate:
-65.17% -> 86.90%
-```
-
-This corresponds to approximately a **45.97% throughput increase** for C over V in the final formal benchmark.
-
-Dynamic TTL improves the probability that reusable prefixes survive tool-call gaps and remain available for subsequent turns.
-
-### Eager/full UCM migration is harmful in this workload
-
-U performs substantially worse than V:
-
-```text
-79.96 -> 25.86 req/s
-```
-
-The main cause is large external KV migration overhead.
-
-Across the final U runs, UCM selected a large number of blocks for migration and generated substantial SSD traffic.
-
-This result shows that external KV capacity alone is not sufficient: migration must be selective enough for the transfer cost to be justified.
-
-### Cost-aware UCM avoids harmful migration
-
-In the formal Full EnvBench-derived F runs, the final cost-aware policy selected:
-
-```text
-UCM selected blocks : 0
-Tier CREATE         : 0
-Tier DUMP           : 0
-Tier LOAD           : 0
-```
-
-Therefore, the formal F result should **not** be described as an SSD-offload speedup.
-
-Instead, the cost-aware policy correctly determined that migration was not profitable under this workload and avoided the large I/O overhead observed in U.
-
-F therefore preserves most of the Continuum benefit while avoiding harmful externalization.
-
----
-
-## 9. KV Cache utilization
-
-For the final Full System at concurrency 128:
-
-```text
-Mean KV utilization : 28.44%
-P95                  : 61.03%
-P99                  : 65.31%
-Max                  : 71.69%
-```
-
-The peak value should not be interpreted as typical utilization.
-
-The project was tested successfully at concurrency 128. This establishes stability **at least up to the tested C128 configuration**; it does not establish C128 as the system's absolute maximum capacity.
-
----
-
-## 10. TTL metric interpretation
-
-The reported `TTL hit` metric is an effective replay metric under the project's scaled / capped replay semantics.
-
-It is **not** the raw prediction accuracy of the original EnvBench timing trace.
-
-For the final formal runs:
-
-```text
-C TTL hit : ~44.18%
-F TTL hit : ~46.38%
-```
-
-See `docs/BENCHMARK.md` for the exact replay semantics and metric definitions.
-
----
-
-## 11. Workload construction
-
-The repository contains generated benchmark workloads under:
-
-```text
-benchmark/workloads/
-```
-
-The formal workload was constructed by filtering complete trajectories such that every runtime event satisfies the serving input limit.
-
-Final construction summary:
-
-```text
-Source eligible single-call trajectories : 3677
-Accepted complete trajectories            : 1274
-Rejected trajectories                     : 2403
-Accepted tool events                       : 13419
-Expected requests                          : 14693
-Accepted input tokens                      : 24,822,191
-```
-
-Accepted input-token distribution:
-
-```text
-min    : 433
-mean   : 1849.78
-median : 1755
-p90    : 3142
-p95    : 3429
-p99    : 3804
-max    : 3997
-```
-
-The workload also implements reset-aware prefix segmentation for trajectories whose input-token sequence decreases across phases.
-
-See:
-
-- `benchmark/scripts/build_full_envbench_workload.py`
-- `benchmark/scripts/build_full_envbench_shards.py`
-- `docs/BENCHMARK.md`
-
----
-
-## 12. Quick start
-
-### 12.1 Clone the three repositories
+### 克隆三个仓库
 
 ```bash
-git clone git@github.com:YEYVHAIOU/vllm-prefix-experiment.git
-git clone git@github.com:YEYVHAIOU/vllm-continuum.git
-git clone git@github.com:YEYVHAIOU/unified-cache-management-continuum.git
+git clone https://github.com/YEYVHAIOU/vllm-prefix-experiment.git
+git clone https://github.com/YEYVHAIOU/vllm-continuum.git
+git clone https://github.com/YEYVHAIOU/unified-cache-management-continuum.git
 ```
 
-Keep them as sibling directories:
+保持三个目录同级：
 
 ```text
 workspace/
@@ -391,7 +170,7 @@ workspace/
 └── unified-cache-management-continuum/
 ```
 
-### 12.2 Check out the frozen source versions
+切换源码版本：
 
 ```bash
 cd vllm-continuum
@@ -401,16 +180,14 @@ cd ../unified-cache-management-continuum
 git checkout ucm-continuum-final-20260822
 ```
 
-### 12.3 Set machine-specific paths
-
-Before launching the system:
+### 配置本机路径
 
 ```bash
 export VENV_PATH=/path/to/your/vllm-environment
 export MODEL_PATH=/path/to/Qwen3-0.6B
 ```
 
-Optional overrides:
+如有需要，可覆盖：
 
 ```bash
 export VLLM_REPO=/path/to/vllm-continuum
@@ -419,45 +196,22 @@ export CUDA_HOME=/usr/local/cuda-12.8
 export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6
 ```
 
-The default source layout expects the two source repositories to be sibling directories of this repository.
-
-### 12.4 Start the final Full System
+### 启动与验收
 
 ```bash
 cd vllm-prefix-experiment
+
 bash deployment/scripts/start_full.sh
-```
-
-Check status:
-
-```bash
 bash deployment/scripts/status.sh
-```
-
-Run the deployment smoke test:
-
-```bash
 bash deployment/scripts/smoke_test.sh
-```
-
-Stop:
-
-```bash
 bash deployment/scripts/stop.sh
 ```
 
-For the complete environment and dependency procedure, read:
+完整依赖、原生扩展、配置参数和常见问题见 [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)。
 
-```text
-docs/DEPLOYMENT.md
-docs/COMPATIBILITY.md
-```
+## 基准测试
 
----
-
-## 13. Reproducing the V/U/C/F benchmark
-
-The case configurations are:
+四种配置位于：
 
 ```text
 benchmark/configs/V.env
@@ -466,151 +220,85 @@ benchmark/configs/C.env
 benchmark/configs/F.env
 ```
 
-Common benchmark configuration:
-
-```text
-benchmark/configs/common.env
-```
-
-The main formal runner is:
+正式主运行脚本：
 
 ```text
 benchmark/scripts/run_full_envbench_vucf.sh
 ```
 
-The run order and auxiliary commands are documented in:
+快速运行顺序见：
 
 ```text
 benchmark/README_RUN_ORDER.md
-docs/BENCHMARK.md
 ```
 
-Generated runtime outputs are intentionally ignored by Git and are written under runtime directories.
-
----
-
-## 14. Deployment versus frozen release
-
-This GitHub repository is a **curated source / reproduction repository**.
-
-The original frozen research release additionally contained:
-
-- Golden Runtime source snapshots,
-- runtime logs,
-- pooled request-level outputs,
-- large integrity manifests,
-- raw archival material,
-- local Git bundles.
-
-Those artifacts are intentionally excluded from the normal Git repository.
-
-The curated GitHub repository should therefore not be interpreted as a byte-for-byte copy of the complete frozen release.
-
-Historical paths such as:
+正式聚合结果位于：
 
 ```text
-/root/autodl-tmp/...
-deployment/runtime/golden/...
+benchmark/results/full_envbench_final_20260823/
 ```
 
-may still appear in provenance documents and frozen benchmark manifests because they record the environment used for the original validated run.
-
-They are historical evidence, not required GitHub checkout paths.
-
----
-
-## 15. Documentation
-
-Detailed documentation:
-
-- [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — installation, deployment, startup, validation, and recovery.
-- [`docs/BENCHMARK.md`](docs/BENCHMARK.md) — workload construction, metrics, V/U/C/F protocol, and result interpretation.
-- [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md) — compatibility modifications and integration details.
-- [`docs/SOURCE_PROVENANCE.md`](docs/SOURCE_PROVENANCE.md) — source lineage, commits, tags, runtime snapshots, and verification.
-- [`docs/min3500_capacity_C76_C96_C128_final_summary.md`](docs/min3500_capacity_C76_C96_C128_final_summary.md) — high-pressure capacity campaign summary.
-
----
-
-## 16. Compatibility notes
-
-The final system is **not** a simple unmodified combination of public upstream vLLM, Continuum, and UCM.
-
-The working implementation required compatibility and integration modifications, including changes around:
-
-- Continuum Dynamic TTL configuration and validation,
-- scheduler / block-pool instrumentation,
-- UCM's vLLM connector integration,
-- DRAMStore / TieredStore compatibility,
-- block-size and cache-size handling,
-- transfer-policy control,
-- request load behavior,
-- empty-load initialization,
-- final runtime and benchmark interfaces.
-
-For the exact implementation history and compatibility details, see:
+主要文件：
 
 ```text
-docs/COMPATIBILITY.md
-docs/SOURCE_PROVENANCE.md
+aggregate_summary.json
+aggregate_summary.tsv
+aggregate_comparison.md
+manifest.tsv
 ```
 
----
+## 文档
 
-## 17. Reproducibility and interpretation caveats
+| 文档 | 内容 |
+|---|---|
+| [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | 安装、部署、启动、Smoke Test 与移植 |
+| [`docs/BENCHMARK.md`](docs/BENCHMARK.md) | 工作负载、指标、聚合方法与正式结果 |
+| [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md) | 相对上游的兼容适配与系统修改 |
+| [`docs/SOURCE_PROVENANCE.md`](docs/SOURCE_PROVENANCE.md) | 源码来源、提交、标签和冻结版本追溯 |
+| [`docs/min3500_capacity_C76_C96_C128_final_summary.md`](docs/min3500_capacity_C76_C96_C128_final_summary.md) | 高压力与并发承载专项实验 |
 
-When using or citing these results, keep the following constraints explicit:
-
-1. The benchmark is an EnvBench-derived **serving replay**, not semantic task-accuracy evaluation.
-2. `TTL hit` is the project's effective replay metric, not raw EnvBench prediction accuracy.
-3. The `min3500` pressure workload uses:
-
-   ```text
-   pressure_tokens = max(original_input_tokens, 3500)
-   ```
-
-   It does not mean every original natural input already contained at least 3500 tokens.
-4. F's final formal result did not rely on successful SSD migration for its speedup; the cost-aware policy selected zero externalized blocks in that campaign.
-5. C128 is the highest formally reported tested concurrency in the final campaign, not a proven absolute capacity limit.
-6. Absolute performance numbers are hardware-, software-, model-, and workload-dependent.
-
----
-
-## 18. Final release identity
+## 已验证环境
 
 ```text
-release_date             = 2026-08-23
-
-model                    = Qwen/Qwen3-0.6B
-
-formal_benchmark         = Full Runtime-Eligible EnvBench
-formal_concurrency       = 128
-formal_trajectories      = 1274
-formal_tool_events       = 13419
-formal_requests_per_case = 14693
-formal_cases             = V,U,C,F
-formal_case_runs         = 36
-formal_total_requests    = 58772
-formal_validation        = PASS
+GPU              : NVIDIA GeForce RTX 4090
+Python           : 3.12.3
+PyTorch          : 2.8.0+cu129
+CUDA Toolkit     : 12.8
+vLLM runtime     : 0.1.dev10+g05f00f8a8
+Model            : Qwen/Qwen3-0.6B
+max_model_len    : 4096
+max input tokens : 4000
+max output tokens: 8
+GPU memory util  : 0.80
+swap             : 1 GiB
 ```
 
-The canonical machine-readable identity is stored in:
+具体环境快照保存在 `manifests/`。
+
+## 结果解释范围
+
+本项目的 EnvBench 实验是服务系统回放，不是语义任务准确率评测。请求使用确定性 token ID 前缀序列，因此实验重点是缓存复用、调度、吞吐、延迟和外部 KV 行为。
+
+TTL 命中率基于经过时间缩放和等待上限处理后的回放工具时间计算。`min3500` 工作负载通过人为补长输入制造 GPU KV 压力。正式 F 实验没有发生实际 KV 外迁，因此当前结果没有建立 Frontier-Tail / SSD 外部存储相对 Continuum-only 的独立加速结论。
+
+绝对性能依赖硬件、模型、软件栈、服务参数和工作负载。
+
+## 冻结 release
+
+主仓库 Git 标签：
 
 ```text
-manifests/final_release_identity.txt
+research-final-20260823
 ```
 
----
+完整冻结 release 另外提供归档包，用于保存 GitHub 精简仓库没有纳入的 Golden Runtime、运行证据、历史归档和大型实验资产。
 
-## 19. License and upstream attribution
+GitHub 仓库不提交模型权重、虚拟环境、SSD backing、Golden Runtime 大型二进制快照和原始 EnvBench 数据。
 
-This repository combines research artifacts that interact with multiple upstream projects.
+## 上游与许可证
 
-Before redistributing a public release, review and preserve the applicable upstream license files, copyright notices, and dataset redistribution terms.
+本项目建立在 vLLM、Continuum 和 Unified Cache Management 等开源项目基础上，并包含项目级兼容适配与研究扩展。
 
-In particular:
+公开发布和再分发时应保留上游许可证、版权声明和必要的 attribution，并遵守相关数据集的再分发条款。UCM 上游 README 中的性能声明属于 UCM 上游项目，不代表本项目正式实验结果。
 
-- preserve upstream vLLM notices,
-- preserve UCM notices and license terms,
-- verify EnvBench redistribution terms before publishing raw source data,
-- do not treat this repository as an official upstream distribution.
-
+本仓库不是任何上游项目的官方发行版。

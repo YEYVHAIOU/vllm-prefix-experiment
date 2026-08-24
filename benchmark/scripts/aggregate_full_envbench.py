@@ -1376,284 +1376,131 @@ def main():
 
 
     md = []
-
-    md.append("# Full EnvBench V/U/C/F Aggregate")
-
+    md.append("# Full EnvBench V/U/C/F 聚合结果")
     md.append("")
-
     md.append(
-
-        "1274 trajectories, 13419 tool events, 14693 requests per case; "
-
-        "9 deterministic shards; concurrency 128; reset-aware replay."
-
+        "正式实验包含 1274 个 trajectories、13419 个工具事件和每组 "
+        "14693 个请求；完整工作负载划分为 9 个确定性分片，在并发 128 "
+        "下启用上下文重置感知回放。"
     )
-
     md.append("")
-
-    md.append("## Overall performance")
-
+    md.append("## 整体性能")
     md.append("")
-
     md.append(
-
-        "| Case | Req/s | Total tok/s | Prefix hit | "
-
+        "| 配置 | Req/s | Total tok/s | Prefix Cache 命中率 | "
         "Mean TTFT | Mean E2E | Mean JCT |"
-
     )
-
-    md.append(
-
-        "|---|---:|---:|---:|---:|---:|---:|"
-
-    )
-
-
+    md.append("|---|---:|---:|---:|---:|---:|---:|")
 
     for case in CASES:
-
         d = aggregate[case]
-
         md.append(
-
             f"| {case} | "
-
             f"{fmt(d['tokens']['request_throughput_req_per_s'], 2)} | "
-
             f"{fmt(d['tokens']['total_throughput_tok_per_s'], 2)} | "
-
             f"{pct(d['prefix_cache']['token_hit_rate'])} | "
-
             f"{fmt(d['latency_seconds']['ttft']['mean'])} s | "
-
             f"{fmt(d['latency_seconds']['e2e']['mean'])} s | "
-
             f"{fmt(d['jct_seconds']['mean'])} s |"
-
         )
 
-
-
     md.append("")
-
-    md.append("## Tail latency")
-
+    md.append("## 尾延迟")
     md.append("")
-
     md.append(
-
-        "| Case | TTFT P50 | TTFT P95 | TTFT P99 | "
-
+        "| 配置 | TTFT P50 | TTFT P95 | TTFT P99 | "
         "E2E P50 | E2E P95 | E2E P99 | "
-
         "JCT P50 | JCT P95 | JCT P99 |"
-
     )
-
     md.append(
-
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|"
-
     )
 
-
-
     for case in CASES:
-
         d = aggregate[case]
-
         t = d["latency_seconds"]["ttft"]
-
         e = d["latency_seconds"]["e2e"]
-
         j = d["jct_seconds"]
-
         md.append(
-
             f"| {case} | "
-
             f"{fmt(t['median'])} | {fmt(t['p95'])} | {fmt(t['p99'])} | "
-
             f"{fmt(e['median'])} | {fmt(e['p95'])} | {fmt(e['p99'])} | "
-
             f"{fmt(j['median'])} | {fmt(j['p95'])} | {fmt(j['p99'])} |"
-
         )
 
-
-
     md.append("")
-
-    md.append("## KV / TTL / UCM")
-
+    md.append("## KV Cache、TTL 与 UCM")
     md.append("")
-
     md.append(
-
-        "| Case | KV mean | KV P95 | KV P99 | KV max | "
-
-        "TTL hit | UCM selected blocks | SSD mean/shard | SSD max/shard |"
-
+        "| 配置 | KV Mean | KV P95 | KV P99 | KV Max | "
+        "TTL 命中率 | UCM 选择 blocks | SSD 平均/分片 | SSD 最大/分片 |"
     )
-
     md.append(
-
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|"
-
     )
-
-
 
     for case in CASES:
-
         d = aggregate[case]
-
-        kv = d["kv_sample_metrics"].get(
-
-            "kv_cache_usage_perc",
-
-            {},
-
-        )
-
+        kv = d["kv_sample_metrics"].get("kv_cache_usage_perc", {})
         ssd = d["storage"]["ssd_store_gib_per_shard"]
-
-
-
         md.append(
-
             f"| {case} | "
-
             f"{pct(kv.get('mean'))} | "
-
             f"{pct(kv.get('p95'))} | "
-
             f"{pct(kv.get('p99'))} | "
-
             f"{pct(kv.get('max'))} | "
-
             f"{pct(d['ttl']['hit_rate'])} | "
-
             f"{fmt(d['ucm'].get('when_selected', 0), 0)} | "
-
             f"{fmt(ssd.get('mean'), 2)} GiB | "
-
             f"{fmt(ssd.get('max'), 2)} GiB |"
-
         )
 
-
-
     md.append("")
-
-    md.append("## Key comparisons")
-
+    md.append("## 关键对比")
     md.append("")
-
-
+    md.append(
+        "| 对比 | 请求吞吐 | Mean TTFT | Mean E2E | Mean JCT | "
+        "Prefix Cache 命中率 |"
+    )
+    md.append("|---|---:|---:|---:|---:|---:|")
 
     for name in ["C_vs_V", "F_vs_V", "U_vs_V", "F_vs_C"]:
-
         c = comparisons[name]
-
+        label = name.replace("_vs_", " vs ")
         md.append(
-
-            f"- **{name.replace('_', ' ')}**: "
-
-            f"request throughput "
-
-            f"{c['request_throughput_delta_percent']:+.2f}%, "
-
-            f"mean TTFT "
-
-            f"{c['ttft_mean_delta_percent']:+.2f}%, "
-
-            f"mean E2E "
-
-            f"{c['e2e_mean_delta_percent']:+.2f}%, "
-
-            f"mean JCT "
-
-            f"{c['jct_mean_delta_percent']:+.2f}%, "
-
-            f"prefix hit "
-
-            f"{c['prefix_hit_rate_delta_percentage_points']:+.2f} pp."
-
+            f"| {label} | "
+            f"{c['request_throughput_delta_percent']:+.2f}% | "
+            f"{c['ttft_mean_delta_percent']:+.2f}% | "
+            f"{c['e2e_mean_delta_percent']:+.2f}% | "
+            f"{c['jct_mean_delta_percent']:+.2f}% | "
+            f"{c['prefix_hit_rate_delta_percentage_points']:+.2f} pp |"
         )
 
-
-
     md.append("")
-
-    md.append("## Interpretation constraints")
-
+    md.append("## 聚合说明")
     md.append("")
-
     md.append(
-
-        "- Throughput is computed from total successful work divided by "
-
-        "the sum of workload replay elapsed time across shards; model/server "
-
-        "startup time is excluded."
-
+        "吞吐按所有分片的成功请求或 token 总量除以工作负载回放耗时总和"
+        "计算，不包含模型和服务启动时间。延迟分位数从所有请求级样本重新"
+        "计算，而不是对分片分位数求平均。"
     )
-
+    md.append("")
     md.append(
-
-        "- Latency percentiles are recomputed from pooled request-level "
-
-        "samples, not averaged from shard percentiles."
-
+        "JCT 在每个分片内按 trajectory 重建，再汇总全部 1274 个 "
+        "trajectories。KV Cache 统计来自周期采样。不同分片顺序执行，"
+        "并在每个配置结束后清理 SSD backing，因此 SSD 数值按分片独立解释。"
     )
-
+    md.append("")
     md.append(
-
-        "- JCT is reconstructed per trajectory within each shard and then "
-
-        "pooled across all 1274 trajectories."
-
+        "TTL 命中率比较预测 TTL 与回放中经过时间缩放和等待上限处理后的"
+        "有效工具时间，不表示原始 EnvBench 工具时长预测准确率。"
     )
-
+    md.append("")
     md.append(
-
-        "- KV statistics are pooled periodic measurement samples."
-
+        "本实验使用 EnvBench 派生 trajectory 结构、token 长度、工具顺序"
+        "和工具等待时间，并以确定性 token ID 前缀构造请求。结果用于评估"
+        "服务系统行为，不评估 EnvBench 语义任务正确率。"
     )
-
-    md.append(
-
-        "- SSD values are per-shard end footprints. Shards executed "
-
-        "sequentially and SSD backing was cleaned after each case."
-
-    )
-
-    md.append(
-
-        "- TTL hit compares predicted TTL with the effective scaled/capped "
-
-        "tool duration used by this serving replay; it is not raw EnvBench "
-
-        "duration prediction accuracy."
-
-    )
-
-    md.append(
-
-        "- This benchmark replays EnvBench-derived trajectory structure, "
-
-        "token lengths, tool sequence and tool delays using deterministic "
-
-        "token-ID prefix streams; it does not evaluate semantic task "
-
-        "correctness."
-
-    )
-
-
 
     md_path = args.output_dir / "aggregate_comparison.md"
 
