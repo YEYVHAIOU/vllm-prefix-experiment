@@ -256,6 +256,7 @@ manifest.tsv
 | [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md) | 相对上游的兼容适配与系统修改 |
 | [`docs/SOURCE_PROVENANCE.md`](docs/SOURCE_PROVENANCE.md) | 源码来源、提交、标签和冻结版本追溯 |
 | [`docs/min3500_capacity_C76_C96_C128_final_summary.md`](docs/min3500_capacity_C76_C96_C128_final_summary.md) | 高压力与并发承载专项实验 |
+| [`docs/SATURATION_OPEN_LOOP_20260825.md`](docs/SATURATION_OPEN_LOOP_20260825.md) | Open-loop 请求率饱和、TTFT/E2E 拐点与持续积压补充实验 |
 
 ## 已验证环境
 
@@ -290,6 +291,8 @@ TTL 命中率基于经过时间缩放和等待上限处理后的回放工具时�
 ```text
 research-final-20260823
 ```
+
+Open-loop 请求率饱和实验是在该冻结 release 之后追加的补充 benchmark；`research-final-20260823` 标签保持不变，主分支包含后续补充实验内容。
 
 完整冻结 release 另外提供归档包，用于保存 GitHub 精简仓库没有纳入的 Golden Runtime、运行证据、历史归档和大型实验资产。
 

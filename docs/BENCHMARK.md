@@ -232,6 +232,16 @@ F 的 Prefix Cache 命中率与 C 基本一致，请求吞吐为 109.24 req/s，
 docs/min3500_capacity_C76_C96_C128_final_summary.md
 ```
 
+## Open-loop 请求率饱和补充实验
+
+为补充固定并发回放，本项目进一步使用 global ready queue 和 request-rate control 进行 open-loop 饱和实验，同时保持各 trajectory 的多轮因果关系。V、C、F 均完成 target 40、45、50、55、60、80 req/s 六个有效测试点，这些点均未触发客户端 `max_inflight=512` safety fuse。
+
+在当前模型、RTX 4090 和 Full Runtime-Eligible workload 下，V 的 TTFT/E2E tail-latency knee 出现在约 48–53 actual req/s，约 57 actual req/s 后开始出现持续积压。C 与 F 的 steady throughput 饱和区间与 V 接近，但 P95/P99 tail latency 在约 44–48 actual req/s 已明显抬升；同时高负载下二者的 P50 仍可低于 V，表明 priority-aware scheduling 主要改变了延迟分布，而不能简单概括为整体服务能力下降。
+
+F 的所有正式 saturation 点均未观察到实际 SSD-backed KV migration。U 的 eager/full saturation 尝试则在 target 15 req/s 时先因 SSD backing 数据耗尽 100 GB 实验盘，因此没有得到可用于容量判断的 U saturation 曲线。
+
+完整方法、数据表、解释边界和结果图见 [`SATURATION_OPEN_LOOP_20260825.md`](SATURATION_OPEN_LOOP_20260825.md)。
+
 ## 实验范围与解释边界
 
 本项目的基准测试主要研究服务系统行为。EnvBench 在这里提供 trajectory 结构、token 长度与工具等待时间等工作负载信息；正式请求使用确定性 token ID 前缀序列，因此结果不直接对应 EnvBench 的语义任务准确率。
@@ -255,5 +265,8 @@ docs/min3500_capacity_C76_C96_C128_final_summary.md
 | 分片构建脚本 | `benchmark/scripts/build_full_envbench_shards.py` |
 | 主运行脚本 | `benchmark/scripts/run_full_envbench_vucf.sh` |
 | 聚合脚本 | `benchmark/scripts/aggregate_full_envbench.py` |
+| Open-loop saturation runner | `benchmark/scripts/run_envbench_runtime_saturation.py` |
+| Open-loop saturation 结果 | `benchmark/results/saturation_openloop_20260825/` |
+| Open-loop saturation 说明 | `docs/SATURATION_OPEN_LOOP_20260825.md` |
 
 完整冻结交付包 另外保留请求级聚合输出、运行日志与历史证据；GitHub 精简仓库以生成脚本、工作负载、聚合结果和 `manifests/` 为主要复现入口。
